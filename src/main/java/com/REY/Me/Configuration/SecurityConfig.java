@@ -35,7 +35,7 @@ public class SecurityConfig {
     @Bean
       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
           http.csrf(customizer->customizer.disable());
-          http.authorizeHttpRequests(request->request.requestMatchers("api/v1/user/register","api/v1/admin/register", "api/v1/login").permitAll().anyRequest().authenticated());
+          http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/user/register","/api/v1/admin/register", "/api/v1/login").permitAll().anyRequest().authenticated());
           http.httpBasic(Customizer.withDefaults());
           http.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
           http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,7 @@ import java.util.function.Function;
 
 @Service
 public class JWTService{
+    private static final Logger LOGGER = LoggerFactory.getLogger(JWTService.class);
 
     SecretKey sk;
     String secretKey;
@@ -28,6 +31,7 @@ public class JWTService{
             sk = KeyGenerator.getInstance("hmacSHA256").generateKey();
              secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
         } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("THERE IS AN ERROR IN THE JWT", e);
             throw new RuntimeException(e);
         }
     }

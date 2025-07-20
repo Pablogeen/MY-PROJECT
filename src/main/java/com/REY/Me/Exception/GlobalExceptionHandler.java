@@ -69,4 +69,15 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(JobNotFoundException.class)
+    public ResponseEntity<?> jobNotFoundException(JobNotFoundException e, WebRequest request){
+        ErrorDetails details = new ErrorDetails(
+                e.getMessage(),
+                "JOB NOT FOUND",
+                request.getDescription(false),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(details, HttpStatus.CONFLICT);
+    }
 }

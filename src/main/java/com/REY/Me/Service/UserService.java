@@ -14,10 +14,10 @@ import com.REY.Me.Exception.UserNotFoundException;
 import com.REY.Me.Exception.UsernameAlreadyExistException;
 import com.REY.Me.Repository.ChangePasswordRepo;
 import com.REY.Me.Repository.UserRepository;
-import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 
 import org.springframework.data.domain.Page;
@@ -60,6 +60,8 @@ public class UserService implements UserDetailsService {
         this.jwtService= jwtService;
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repo.findByUsername(username)
@@ -78,6 +80,7 @@ public class UserService implements UserDetailsService {
 
         if(usernameExist){
             throw  new UsernameAlreadyExistException("USERNAME ALREADY TAKEN");
+
         }
         user.setUsername(request.getUsername());
 
