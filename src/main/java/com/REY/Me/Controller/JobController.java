@@ -11,7 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api")
@@ -50,10 +50,16 @@ public class JobController {
 
     }
 
-    @PreAuthorize("hasAuthority['ADMIN']")
+    @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
     @DeleteMapping("/job/{id}")
     public ResponseEntity<Job>deleteJob(@PathVariable Long id){
         return new ResponseEntity<>(service.getJobById(id), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
+    @PatchMapping("/job/{id}")
+    public ResponseEntity<Job>updateJob(@PathVariable Long id, @RequestBody Job job){
+        return new ResponseEntity<>(service.updateJob(id, job), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority['ADMIN','USER']")
@@ -61,9 +67,6 @@ public class JobController {
     public ResponseEntity<List<Job>>searchJob(@RequestParam String search){
         return new ResponseEntity<>(service.searchJob(search), HttpStatus.OK);
     }
-
-
-
 
 
 }

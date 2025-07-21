@@ -49,4 +49,19 @@ public class JobService {
        return repo.search(search)
                .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
     }
+
+    public Job updateJob(Long id, Job job) {
+        Job job1 = repo.findById(id)
+                .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
+
+        job1.setTitle(job.getTitle());
+        job1.setCompany(job.getCompany());
+        job1.setDescription(job.getDescription());
+        job1.setCategory(job.getCategory());
+        job1.setLocation(job.getLocation());
+        job1.setTechs(job.getTechs());
+        job1.setSalary(job.getSalary());
+
+        return repo.save(job1);
+    }
 }

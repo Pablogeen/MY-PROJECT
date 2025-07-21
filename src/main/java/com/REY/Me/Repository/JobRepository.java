@@ -23,4 +23,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
             "OR lower(salary) LIKE lower(concat('%', :search, '%'))" +
             "OR lower(category) LIKE lower(concat('%', :search, '%'))" , nativeQuery = true)
     Optional<List<Job>> search(String search);
+
+    @Query(value = "SELECT user_id FROM Job WHERE id =:id", nativeQuery = true)
+    Long findUserByJobId(Long id);
 }

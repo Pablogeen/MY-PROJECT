@@ -80,4 +80,15 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?>accessDeniedException(AccessDeniedException e, WebRequest request){
+        ErrorDetails details = new ErrorDetails(
+                e.getMessage(),
+                "YOU ARE NOT AUTHORIZED TO PERFORM THIS ACTION",
+                request.getDescription(false),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(details, HttpStatus.FORBIDDEN);
+    }
 }
