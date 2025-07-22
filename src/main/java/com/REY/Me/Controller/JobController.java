@@ -2,6 +2,7 @@ package com.REY.Me.Controller;
 
 import com.REY.Me.Entity.Job;
 import com.REY.Me.Service.JobService;
+import jakarta.mail.MessagingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,7 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -66,6 +69,12 @@ public class JobController {
     @PostMapping("/job/search")
     public ResponseEntity<List<Job>>searchJob(@RequestParam String search){
         return new ResponseEntity<>(service.searchJob(search), HttpStatus.OK);
+    }
+
+
+    @PostMapping("/job/apply")
+    public ResponseEntity<String> uploadCV(@RequestBody MultipartFile file) throws IOException, MessagingException {
+        return new ResponseEntity<>(service.uploadCV(file), HttpStatus.OK);
     }
 
 

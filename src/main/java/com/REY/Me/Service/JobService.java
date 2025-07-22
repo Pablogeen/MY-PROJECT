@@ -1,23 +1,37 @@
 package com.REY.Me.Service;
 
 import com.REY.Me.Entity.Job;
+import com.REY.Me.Entity.User;
 import com.REY.Me.Exception.JobNotFoundException;
 import com.REY.Me.Repository.JobRepository;
+import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
 public class JobService {
 
     private JobRepository repo;
+    private EmailSenderService emailService;
 
-    public JobService(JobRepository repo){
+
+
+    public JobService(JobRepository repo, EmailSenderService emailService){
         this.repo=repo;
+        this.emailService = emailService;
     }
 
     public String postJob(Job job) {
@@ -64,4 +78,40 @@ public class JobService {
 
         return repo.save(job1);
     }
+
+    private static final String UPLOAD_DIR = "uploads/";
+
+    public String uploadCV(MultipartFile file) throws IOException, MessagingException {
+        //If file is empty or not present
+      if(file==null || file.isEmpty()){
+          throw new IllegalStateException("File is empty or not present");
+      }
+            //Check if the directory exist then create new one
+      Path uploadPath = Path.of(UPLOAD_DIR);
+      if (!Files.exists(uploadPath)){
+          Files.createDirectories(uploadPath);
+      }
+
+        //Generates a unique filename to avoid overwrites
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = originalFileName !=null ? originalFileName.substring(originalFileName.lastIndexOf(".")): "";
+        String uniqueFileName = UUID.randomUUID() + fileExtension;
+
+        //Saving the file
+        Path filePath = uploadPath.resolve(uniqueFileName);
+        Files.write(filePath, file.getBytes());
+
+        User user = new User();
+        Job job = new Job();
+
+        user= job.getUser();
+
+        emailService.sendWithEmail(user.getEmail(), originalFileName, filePath.toString());
+
+
+            return "YOU HAVE APPLIED THIS JOB SUCCESSFULLY";
+
+
+    }
+
 }
