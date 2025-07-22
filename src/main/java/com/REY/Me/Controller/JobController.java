@@ -32,21 +32,21 @@ public class JobController {
         return new ResponseEntity<>(service.postJob(job), HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasAnyAuthority['ADMIN','USER']")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping("/job")
     public ResponseEntity<List<Page<Job>>>getJob(@RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);
         return new ResponseEntity<>(service.getJob(pageable), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority['ADMIN','USER']")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping("/job/{category}")
     public ResponseEntity<List<Page<Job>>> getJobByCategory(@RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size, @PathVariable String category){
         Pageable pageable = PageRequest.of(page, size);
         return new ResponseEntity<>(service.getJobByCategory(pageable, category), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority['ADMIN','USER']")
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping("/job/{id}")
     public ResponseEntity<Job>JobById(@PathVariable Long id){
         return new ResponseEntity<>(service.getJobById(id), HttpStatus.OK);
