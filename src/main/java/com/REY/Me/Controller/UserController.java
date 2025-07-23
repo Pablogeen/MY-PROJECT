@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class UserController {
 
     private UserService service;
@@ -29,47 +29,47 @@ public class UserController {
         this.service=service;
     }
 
-    @PostMapping("/v1/user/register")
+    @PostMapping("/user/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody UserRequest request){
         return new ResponseEntity<>(service.registerUser(request), HttpStatus.CREATED);
 
     }
 
-    @GetMapping("v1/user/confirmAccount")
+    @GetMapping("/confirmAccount")
     public ResponseEntity<String>confirmAccount(@RequestParam String token){
         return new ResponseEntity<>(service.confirmAccount(token), HttpStatus.OK);
     }
 
-    @PostMapping("/v1/admin/register")
+    @PostMapping("/admin/register")
     public ResponseEntity<String> registerAdmin(@Valid @RequestBody UserRequest request){
         return new ResponseEntity<>(service.registerAdmin(request), HttpStatus.CREATED);
     }
 
-    @PostMapping("/v1/login")
+    @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO login){
         return new ResponseEntity<>(service.login(login), HttpStatus.OK);
     }
 
-    @PostMapping("/v1/changePassword")
+    @PostMapping("/changePassword")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordDTO passwordDTO){
         return new ResponseEntity<>(service.changePassword(passwordDTO), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/v1/users")
+    @GetMapping("/users")
     public ResponseEntity<List<Page<User>>> getAllUsers(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);
         return new ResponseEntity<>(service.getAllUsers(pageable), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/v1/user/{id}")
+    @GetMapping("/users/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id){
         return new ResponseEntity<>(service.getUserById(id), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/v1/user/{role}")
+    @GetMapping("/user/{role}")
     public ResponseEntity<List<User>> getRoleByUser(@PathVariable String role, @RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);
         return new ResponseEntity<>(service.getUsersByRole(role, pageable), HttpStatus.OK);

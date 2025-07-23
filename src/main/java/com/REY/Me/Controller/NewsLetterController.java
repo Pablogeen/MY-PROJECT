@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/newsLetter")
+@RequestMapping("/newsLetters")
 public class NewsLetterController {
 
     private NewsLetterService service;
@@ -30,7 +30,7 @@ public class NewsLetterController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    @GetMapping("/get")
+    @GetMapping()
     public ResponseEntity<List<NewsLetter>>readNewsLetter(){
             return new ResponseEntity<>(service.getNewsByDateTime(), HttpStatus.OK);
     }
