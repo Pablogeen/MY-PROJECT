@@ -72,7 +72,7 @@ public class JobController {
     }
 
 
-    @PreAuthorize("hasAuthority('USER'")
+    @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/apply")
     public ResponseEntity<String> uploadCV(@RequestPart MultipartFile file) throws IOException, MessagingException {
         return new ResponseEntity<>(service.uploadCV(file), HttpStatus.OK);
