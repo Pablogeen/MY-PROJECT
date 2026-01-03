@@ -1,5 +1,6 @@
 package com.REY.Me.DTO;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -9,17 +10,21 @@ public class UserRequest {
 
     @NotBlank
     @NotNull
-    private String firstName;
+    private String firstname;
     @NotBlank
     @NotNull
-    private String lastName;
+    private String lastname;
     @NotBlank
     @NotNull
     private String username;
     @NotBlank
     @NotNull
+    @Email
     private String email;
     @NotBlank
     @NotNull
     private String password;
+    @NotBlank
+    @NotNull
+    private String confirmPassword;
 }

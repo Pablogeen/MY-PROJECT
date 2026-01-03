@@ -35,7 +35,20 @@ public class SecurityConfig {
     @Bean
       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
           http.csrf(customizer->customizer.disable());
-          http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/user/register","/api/v1/admin/register", "/api/v1/login").permitAll().anyRequest().authenticated());
+          http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/user").permitAll()
+                          .requestMatchers("/api/v1/job/add").hasAnyAuthority("ADMIN","USER")
+                         .requestMatchers("/api/v1/job").hasAnyAuthority("ADMIN","USER")
+                          .requestMatchers("/api/v1/job/id").hasAnyAuthority("ADMIN","USER")
+                          .requestMatchers("/api/v1/job/delete/id").hasAnyAuthority("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
+                          .requestMatchers("/api/v1/job/update/id").hasAnyAuthority("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
+                          .requestMatchers("/api/v1/job/search").hasAnyAuthority("ADMIN","USER")
+                         .requestMatchers("/api/v1/job/category").hasAnyAuthority("ADMIN","USER")
+                          .requestMatchers("/api/v1/job/apply").hasAuthority("USER")
+                        .requestMatchers("/api/v1/NewsLetter/post").hasAnyAuthority("ADMIN","USER")
+                  .requestMatchers("/api/v1/NewsLetter").hasAnyAuthority("ADMIN","USER")
+                  .requestMatchers("/api/v1/job/NewsLetter/id").hasAnyAuthority("ADMIN","USER")
+                  .requestMatchers("/api/v1/NewsLetter/delete").hasAnyAuthority("ADMIN","USER").anyRequest().authenticated());
+
           http.httpBasic(Customizer.withDefaults());
           http.sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
           http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
@@ -48,6 +61,11 @@ public class SecurityConfig {
 
           return http.build();
       }
+
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
       @Bean
       public AuthenticationProvider provider(){

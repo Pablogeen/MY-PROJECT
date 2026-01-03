@@ -17,7 +17,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/api/v1/jobs")
+@RequestMapping("/api/v1/job")
 public class JobController {
 
     private JobService service;
@@ -54,13 +54,13 @@ public class JobController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete/{id}")
     public ResponseEntity<Job>deleteJob(@PathVariable Long id){
         return new ResponseEntity<>(service.getJobById(id), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
-    @PutMapping("/{id}")
+    @PutMapping("update/{id}")
     public ResponseEntity<Job>updateJob(@PathVariable Long id, @RequestBody Job job){
         return new ResponseEntity<>(service.updateJob(id, job), HttpStatus.OK);
     }
@@ -72,6 +72,7 @@ public class JobController {
     }
 
 
+    @PreAuthorize("hasAuthority('USER'")
     @PostMapping("/apply")
     public ResponseEntity<String> uploadCV(@RequestPart MultipartFile file) throws IOException, MessagingException {
         return new ResponseEntity<>(service.uploadCV(file), HttpStatus.OK);

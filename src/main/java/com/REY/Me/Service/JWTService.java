@@ -1,5 +1,6 @@
 package com.REY.Me.Service;
 
+import com.REY.Me.Entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -7,21 +8,27 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class JWTService{
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTService.class);
+
+    private UserService service;
+
+    public JWTService(@Lazy UserService service){
+        this.service = service;
+    }
 
     SecretKey sk;
     String secretKey;
@@ -40,13 +47,19 @@ public class JWTService{
     public String generateToken(@NotBlank @NotNull String username) {
         Map<String, Object> claims = new HashMap<>();
 
+        User userDetails =
+                (User) service.loadUserByUsername(username.strip());
+
+            List<String> authorities =
+                            userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+                                    .collect(Collectors.toList());
+
         return Jwts.builder()
-                .claims()
-                .add(claims)
-                .subject(username)
+                .claim("authorities", authorities)
+                .addClaims(claims)
+                .setSubject(username.strip())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis()+60*60*30))
-                .and()
                 .signWith(getKey())
                 .compact();
     }
@@ -65,7 +78,7 @@ public class JWTService{
         return  claimResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token){
+    public Claims extractAllClaims(String token){
         return Jwts.parser()
                 .verifyWith(getKey())
                 .build()

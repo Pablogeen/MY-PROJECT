@@ -5,7 +5,8 @@ import com.REY.Me.Entity.User;
 import com.REY.Me.Exception.JobNotFoundException;
 import com.REY.Me.Repository.JobRepository;
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class JobService {
     private EmailSenderService emailService;
 
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
 
     public JobService(JobRepository repo, EmailSenderService emailService){
         this.repo=repo;
@@ -37,6 +39,7 @@ public class JobService {
     public String postJob(Job job) {
         repo.save(job);
         return "JOB POSTED SUCCESSFULLY";
+
     }
 
     public List<Page<Job>> getJob(Pageable pageable) {
@@ -46,6 +49,7 @@ public class JobService {
     public List<Page<Job>> getJobByCategory(Pageable pageable, String category) {
         return repo.findByCategory(pageable, category)
                 .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
+
 
     }
 
@@ -104,9 +108,13 @@ public class JobService {
         User user = new User();
         Job job = new Job();
 
+
         user= job.getUser();
 
-        emailService.sendWithEmail(user.getEmail(), originalFileName, filePath.toString());
+        String jobOwnerEmail = user.getEmail();
+
+
+        emailService.sendFileWithEmail(jobOwnerEmail, originalFileName, filePath.toString());
 
 
             return "YOU HAVE APPLIED THIS JOB SUCCESSFULLY";

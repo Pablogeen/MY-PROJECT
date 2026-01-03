@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
                 request.getDescription(false),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(EmailAlreadyExistException.class)
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
                 request.getDescription(false),
                 LocalDateTime.now()
         );
-                return new ResponseEntity<>(details, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(InvalidEmailException.class)
@@ -89,6 +89,28 @@ public class GlobalExceptionHandler {
                 request.getDescription(false),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(details, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(details, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(EmailSendingFailedException.class)
+    public ResponseEntity<?> EmailSendingFailedException(EmailSendingFailedException e, WebRequest request){
+        ErrorDetails details = new ErrorDetails(
+                e.getMessage(),
+                "ERROR SENDING MESSAGE",
+                request.getDescription(false),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(details, HttpStatus.CONFLICT);
+    }
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<?> passwordMismatchException(PasswordMismatchException e, WebRequest request){
+        ErrorDetails details = new ErrorDetails(
+                e.getMessage(),
+                "PASSWORD MISMATCHED",
+                request.getDescription(false),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(details, HttpStatus.CONFLICT);
     }
 }

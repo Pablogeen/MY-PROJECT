@@ -14,12 +14,12 @@ public class JobSecurity {
         this.repo =repo;
     }
 
+
     public boolean isJobOwner(Authentication authentication, Long id){
         User user = (User) authentication.getPrincipal();
         Long userId = user.getId();
         Long jobOwnerId = repo.findUserByJobId(id);
         return userId.equals(jobOwnerId);
-
     }
 
 }

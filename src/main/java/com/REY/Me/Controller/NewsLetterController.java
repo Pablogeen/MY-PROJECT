@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/newsLetters")
+@RequestMapping("api/v1/NewsLetter")
 public class NewsLetterController {
 
     private NewsLetterService service;

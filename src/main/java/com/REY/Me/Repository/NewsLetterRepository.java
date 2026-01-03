@@ -11,9 +11,9 @@ import java.util.List;
 public interface NewsLetterRepository extends JpaRepository<NewsLetter, Long> {
 
 
-    @Query(value = "SELECT user_id FROM NewsLetter WHERE id =:id", nativeQuery = true)
+    @Query(value = "SELECT user_id FROM news_letter WHERE id =:id", nativeQuery = true)
     Long findNewsPostedById(Long id);
 
-    @Query(value = "SELECT * FROM NewsLetter ORDER BY timePosted ASC", nativeQuery = true)
+    @Query(value = "SELECT * FROM news_letter ORDER BY time_posted ASC", nativeQuery = true)
     List<NewsLetter> getNewsByOrderOfDate();
 }
