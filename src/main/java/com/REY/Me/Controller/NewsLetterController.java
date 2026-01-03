@@ -35,13 +35,13 @@ public class NewsLetterController {
             return new ResponseEntity<>(service.getNewsByDateTime(), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER'")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public ResponseEntity<Optional<NewsLetter>>readNewsById(@PathVariable Long id){
         return new ResponseEntity<>(service.readNewsById(id), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN' or @NewsLetterSecurity.isNewsOwner(authentication, #id)")
+    @PreAuthorize("hasAnyAuthority('ADMIN') or @NewsLetterSecurity.isNewsOwner(authentication, #id)")
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteNews(@PathVariable Long id){
         return new ResponseEntity<>(service.readNewsById(id), HttpStatus.OK);
