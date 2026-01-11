@@ -38,6 +38,7 @@ public class UserHelper {
         log.info("Confirmation Details saved successfully");
 
         String link = "localhost:8080/api/v1/user/register/confirm?token= "+token;
+        log.info("Token generated");
 
         emailService.sendConfirmationEmail(user.getEmail(), emailBuilder.buildEmail(user.getFirstname(), link));
         log.info("Email sent successfully");

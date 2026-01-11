@@ -32,7 +32,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody UserRequestDto request) throws MessagingException {
-        log.info("Received request to register user: {}", request);
+        log.info("Received request to register user: {}");
         String registerUser = userServiceInterface.register(request);
         log.info("User registered successfully: {}",registerUser);
         return new ResponseEntity<>(registerUser, HttpStatus.CREATED);

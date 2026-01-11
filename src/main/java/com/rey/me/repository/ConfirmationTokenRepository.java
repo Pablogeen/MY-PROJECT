@@ -4,6 +4,7 @@ import com.rey.me.entity.ConfirmationToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,6 @@ public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationT
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE confirmation_token SET confirmed_at =:createdAt WHERE token=:token", nativeQuery = true)
-    int updateConfirmationDetails(String token, LocalDateTime createdAt);
+    @Query(value = "UPDATE confirmation_token SET confirmed_at = :confirmedAt WHERE token = :token", nativeQuery = true)
+    int updateConfirmationDetails(@Param("token") String token, @Param("confirmedAt") LocalDateTime confirmedAt);
 }
