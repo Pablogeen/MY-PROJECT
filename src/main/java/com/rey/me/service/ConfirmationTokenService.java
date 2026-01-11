@@ -2,19 +2,17 @@ package com.rey.me.service;
 
 import com.rey.me.entity.ConfirmationToken;
 import com.rey.me.repository.ConfirmationTokenRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ConfirmationTokenService {
 
-    private ConfirmationTokenRepository repo;
-
-    public ConfirmationTokenService(ConfirmationTokenRepository repo){
-        this.repo= repo;
-    }
+    private final ConfirmationTokenRepository repo;
 
 
     public void saveConfirmationToken(ConfirmationToken confirmToken) {

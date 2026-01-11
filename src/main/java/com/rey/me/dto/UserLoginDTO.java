@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class UserLoginDTO {
 
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "Username Required")
+    @NotNull(message = "Username Required")
     private String username;
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "Password Required")
+    @NotNull(message = "Password Required")
     private String password;
 }

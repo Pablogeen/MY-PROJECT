@@ -1,4 +1,4 @@
-package com.rey.me.repository;
+package com.rey.me.interfaces;
 
 import jakarta.mail.MessagingException;
 

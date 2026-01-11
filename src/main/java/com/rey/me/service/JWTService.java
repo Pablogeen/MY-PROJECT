@@ -6,9 +6,9 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -21,14 +21,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class JWTService{
     private static final Logger LOGGER = LoggerFactory.getLogger(JWTService.class);
 
-    private UserServiceImpl service;
+        private final UserDetailsService userDetailsService;
 
-    public JWTService(@Lazy UserServiceImpl service){
-        this.service = service;
-    }
 
     SecretKey sk;
     String secretKey;
@@ -48,7 +46,7 @@ public class JWTService{
         Map<String, Object> claims = new HashMap<>();
 
         User userDetails =
-                (User) service.loadUserByUsername(username.strip());
+                (User) userDetailsService.loadUserByUsername(username.strip());
 
             List<String> authorities =
                             userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)

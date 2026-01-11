@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class ResetPasswordDTO {
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Email Required")
+    @NotBlank(message = "Email Required")
     private String email;
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Token Required")
+    @NotBlank(message = "Token Required")
     private String token;
-    @NotNull
-    @NotBlank
+    @NotNull(message = "New Password Required")
+    @NotBlank(message = "New Password Required")
     private String NewPassword;
 }
