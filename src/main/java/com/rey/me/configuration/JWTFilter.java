@@ -31,9 +31,24 @@ public class JWTFilter extends OncePerRequestFilter {
     private final ApplicationContext context;
 
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/api/v1/users/register",
+            "/api/v1/auth/login",
+            "/api/v1/users/confirmAccount"
+    );
 
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
+
+        String path = request.getServletPath();
+
+        // skip JWT validation for registration and other public endpoints
+        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(p -> path.equals(p) || path.startsWith(p + "/"));
+        if (isPublic) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader =request.getHeader("Authorization");
         String token = null;

@@ -51,7 +51,6 @@ public class UserServiceImpl implements UserServiceInterface {
 
 
     @Transactional
-    @Async
     public String register(UserRequestDto request) throws MessagingException {
 
         User user = new User();

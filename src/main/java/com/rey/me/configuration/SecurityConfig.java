@@ -30,7 +30,7 @@ public class SecurityConfig {
     @Bean
       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
           http.csrf(customizer->customizer.disable());
-          http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/user").permitAll()
+          http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/users/**").permitAll()
                           .requestMatchers("/api/v1/job/add").hasAnyAuthority("ADMIN","USER")
                          .requestMatchers("/api/v1/job").hasAnyAuthority("ADMIN","USER")
                           .requestMatchers("/api/v1/job/id").hasAnyAuthority("ADMIN","USER")
