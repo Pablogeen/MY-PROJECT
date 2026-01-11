@@ -3,10 +3,9 @@ package com.rey.me.controller;
 import com.rey.me.dto.ChangePasswordDTO;
 import com.rey.me.dto.ResetPasswordDTO;
 import com.rey.me.dto.UserLoginDTO;
-import com.rey.me.dto.UserRequest;
-import com.rey.me.entity.ROLE;
+import com.rey.me.dto.UserRequestDto;
 import com.rey.me.entity.User;
-import com.rey.me.serviceInterface.UserServiceInterface;
+import com.rey.me.interfaces.UserServiceInterface;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +31,9 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody UserRequest request) throws MessagingException {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody UserRequestDto request) throws MessagingException {
         log.info("Received request to register user: {}", request);
-        String registerUser = userServiceInterface.register(request, ROLE.USER);
+        String registerUser = userServiceInterface.register(request);
         log.info("User registered successfully: {}",registerUser);
         return new ResponseEntity<>(registerUser, HttpStatus.CREATED);
 
@@ -46,8 +45,8 @@ public class UserController {
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@Valid @RequestBody UserRequest request) throws MessagingException {
-        String registerAdmin= userServiceInterface.register(request, ROLE.ADMIN);
+    public ResponseEntity<String> registerAdmin(@Valid @RequestBody UserRequestDto request) throws MessagingException {
+        String registerAdmin= userServiceInterface.register(request);
         return new ResponseEntity<>(registerAdmin, HttpStatus.CREATED);
     }
 

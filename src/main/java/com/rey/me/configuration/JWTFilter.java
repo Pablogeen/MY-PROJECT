@@ -1,12 +1,13 @@
 package com.rey.me.configuration;
 
 import com.rey.me.service.JWTService;
-import com.rey.me.service.UserServiceImpl;
+import com.rey.me.service.UserDetailsService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,15 +24,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
-    private JWTService service;
-    private ApplicationContext context;
+    private final JWTService service;
+    private final ApplicationContext context;
 
-    public JWTFilter(@Lazy JWTService service, ApplicationContext context){
-        this.service= service;
-        this.context=context;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -49,7 +47,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null){
 
-            UserDetails userDetails = context.getBean(UserServiceImpl.class).loadUserByUsername(username);
+            UserDetails userDetails = context.getBean(UserDetailsService.class).loadUserByUsername(username);
 
             Claims claims = service.extractAllClaims(token);
 

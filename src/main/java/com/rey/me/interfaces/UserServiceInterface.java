@@ -1,10 +1,9 @@
-package com.rey.me.serviceInterface;
+package com.rey.me.interfaces;
 
 import com.rey.me.dto.ChangePasswordDTO;
 import com.rey.me.dto.ResetPasswordDTO;
 import com.rey.me.dto.UserLoginDTO;
-import com.rey.me.dto.UserRequest;
-import com.rey.me.entity.ROLE;
+import com.rey.me.dto.UserRequestDto;
 import com.rey.me.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -16,7 +15,7 @@ import java.util.List;
 
 @Component
 public interface UserServiceInterface {
-    String register(@Valid UserRequest request, ROLE role)throws MessagingException;
+    String register(@Valid UserRequestDto request)throws MessagingException;
 
     String confirmAccount(String token);
 

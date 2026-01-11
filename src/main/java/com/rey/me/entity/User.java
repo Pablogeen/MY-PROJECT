@@ -2,14 +2,17 @@ package com.rey.me.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class User implements UserDetails {
 
@@ -25,7 +28,6 @@ public class User implements UserDetails {
     private String username;
     @Column(nullable = false, unique = true)
     private String email;
-    @JsonIgnore
     private String password;
     private boolean enabled=false;
     @Enumerated(EnumType.STRING)

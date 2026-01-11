@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class ChangePasswordDTO {
 
-    @NotNull
-    @NotBlank
+    @NotNull(message = "Current Password can't be null")
+    @NotBlank(message = "Password Expected")
     private String currentPassword;
-    @NotNull
-    @NotBlank
+    @NotNull(message = "New Password can't be null")
+    @NotBlank(message = "Password Expected")
     private String newPassword;
 }

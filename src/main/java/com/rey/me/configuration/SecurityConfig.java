@@ -1,6 +1,6 @@
 package com.rey.me.configuration;
 
-import com.rey.me.service.UserServiceImpl;
+import com.rey.me.service.UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,9 +24,8 @@ import org.springframework.security.web.authentication.logout.HttpStatusReturnin
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-
-    private final UserServiceImpl service;
     private final JWTFilter filter;
+    private final UserDetailsService userDetailsService;
 
     @Bean
       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -67,7 +66,7 @@ public class SecurityConfig {
       public AuthenticationProvider provider(){
           DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
           authProvider.setPasswordEncoder(new BCryptPasswordEncoder(12));
-          authProvider.setUserDetailsService(service);
+          authProvider.setUserDetailsService(userDetailsService);
           return authProvider;
       }
 
