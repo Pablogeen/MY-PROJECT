@@ -1,9 +1,6 @@
 package com.rey.me.service;
 
-import com.rey.me.dto.ChangePasswordDTO;
-import com.rey.me.dto.ResetPasswordDTO;
-import com.rey.me.dto.UserLoginDTO;
-import com.rey.me.dto.UserRequestDto;
+import com.rey.me.dto.*;
 import com.rey.me.entity.*;
 import com.rey.me.exception.*;
 import com.rey.me.helper.EmailBuilder;
@@ -16,9 +13,9 @@ import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -38,7 +34,6 @@ import java.util.Random;
 public class UserServiceImpl implements UserServiceInterface {
 
     private final UserRepository repo;
-    private final EmailValidation validator;
     private final ConfirmationTokenService service;
     private final EmailSenderService emailService;
     private final AuthenticationManager manager;
@@ -48,7 +43,7 @@ public class UserServiceImpl implements UserServiceInterface {
     private final BCryptPasswordEncoder encoder;
     private final UserHelper userHelper;
     private final EmailBuilder emailBuilder;
-
+    private final ModelMapper modelMapper;
 
     @Transactional
     public String register(UserRequestDto request) throws MessagingException {
@@ -58,19 +53,15 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setLastname(request.getLastname().strip());
 
         boolean usernameExist = repo.findByUsername(request.getUsername().strip()).isPresent();
+        log.info("Check if username is present: {}",usernameExist);
 
         if(usernameExist){
             throw  new UsernameAlreadyExistException("USERNAME ALREADY TAKEN");
         }
         user.setUsername(request.getUsername().strip());
 
-        boolean isValid = validator.test(request.getEmail().strip());
-
-        if (!isValid){
-            throw new InvalidEmailException("INVALID EMAIL");
-        }
-
         boolean emailExist = repo.findByEmail(request.getEmail().strip()).isPresent();
+        log.info("Check if email is present: {}",emailExist);
 
         if (emailExist){
             throw new EmailAlreadyExistException("EMAIL ALREADY TAKEN");
@@ -85,6 +76,7 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setPassword(encoder.encode(request.getPassword().strip()));
         user.setRole(ROLE.USER);
         repo.save(user);
+        log.info("User saved successfully: {}",user.getUsername());
 
         ConfirmationToken confirmationToken = new ConfirmationToken();
         userHelper.sendConfirmationToken(confirmationToken, user);
@@ -134,7 +126,7 @@ public class UserServiceImpl implements UserServiceInterface {
 
     }
 
-        @Transactional
+    @Transactional
     public String changePassword(@Valid ChangePasswordDTO passwordDTO, User user) {
 
         ChangePassword changePassword = new ChangePassword();
@@ -158,15 +150,9 @@ public class UserServiceImpl implements UserServiceInterface {
     }
 
     @Transactional
-    @Async
     public String resetPassword(@Valid ResetPasswordDTO resetPassword) throws MessagingException {
        boolean emailExist = repo.findByEmail(resetPassword.getEmail().strip()).isPresent();
 
-       boolean isValidEmail = validator.test(resetPassword.getEmail().strip());
-
-       if (!isValidEmail){
-           throw new InvalidEmailException("INVALID EMAIL");
-       }
         User user = new User();
 
        if(!emailExist && user.isEnabled()){
@@ -208,13 +194,24 @@ public class UserServiceImpl implements UserServiceInterface {
 
     }
 
-    public List<Page<User>> getAllUsers(Pageable pageable) {
-        return Collections.singletonList(repo.findAll(pageable));
+    public Page<UserResponseDto> getAllUsers(Pageable pageable) {
+        Page<User> userPage = repo.findAll(pageable);
+        log.info("Gotten all users from the database");
+
+        Page<UserResponseDto> userResponseDto =userPage
+                        .map(user -> modelMapper.map(user, UserResponseDto.class));
+        log.info("Mapped user into UserResponseDto: {}",userResponseDto);
+
+        return userResponseDto;
     }
 
-    public User getUserById(Long id) {
-        return repo.findById(id)
-                .orElseThrow(()->new UserNotFoundException("USER NOT FOUND"));
+    public UserResponseDto getUserById(Long id) {
+        User user = repo.findById(id)
+                .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
+        log.info("User found with id: {}",user.getId());
+            UserResponseDto userResponse = modelMapper.map(user, UserResponseDto.class);
+            log.info("Mapped user to userResponse: {}",userResponse);
+        return userResponse;
     }
 
 
@@ -222,11 +219,45 @@ public class UserServiceImpl implements UserServiceInterface {
         return repo.findByRole(role, pageable);
     }
 
+    @Override
+    @Transactional
+    public String assignAdminRole(Long id) {
 
+        User user = repo.findById(id)
+                .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
+        log.info("User with id: {} found",user.getId());
 
+        if (ROLE.USER.equals(user.getRole())) {
+            log.error("User already has admin privileges");
+            throw new IllegalStateException("User already has admin privileges");
+        }
 
+        user.setRole(ROLE.ADMIN);
+        log.info("Role set to Admin");
 
+        repo.save(user);
+        return "ADMIN ROLE GRANTED SUCCESSFULLY";
+    }
 
+    @Override
+    @Transactional
+    public String revokeAdminRole(Long id) {
+
+        User user = repo.findById(id)
+                .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
+        log.info("User id: {} found",user.getId());
+
+        if (ROLE.ADMIN.equals(user.getRole())){
+            log.error("User already has User privileges");
+            throw new IllegalStateException("User already has User privileges");
+        }
+
+        user.setRole(ROLE.USER);
+        log.info("Role revoked to User");
+
+        repo.save(user);
+        return "ADMIN ROLE REVOKED SUCCESSFULLY";
+    }
 
 
 }

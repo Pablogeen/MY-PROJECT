@@ -32,7 +32,10 @@ public class SecurityConfig {
           http.csrf(customizer->customizer.disable());
           http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/users/**").permitAll()
                           .requestMatchers("/api/v1/job/add").hasAnyAuthority("ADMIN","USER")
-                         .requestMatchers("/api/v1/job").hasAnyAuthority("ADMIN","USER")
+                  .requestMatchers("/api/v1/users/assignAdmin").hasAnyAuthority("ADMIN")
+                  .requestMatchers("/api/v1/users/revokeAdmin").hasAnyAuthority("ADMIN")
+
+                  .requestMatchers("/api/v1/job").hasAnyAuthority("ADMIN","USER")
                           .requestMatchers("/api/v1/job/id").hasAnyAuthority("ADMIN","USER")
                           .requestMatchers("/api/v1/job/delete/id").hasAnyAuthority("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
                           .requestMatchers("/api/v1/job/update/id").hasAnyAuthority("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")

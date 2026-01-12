@@ -20,13 +20,13 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String firstname;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String lastname;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 20)
     private String username;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 30)
     private String email;
     private String password;
     private boolean enabled=false;

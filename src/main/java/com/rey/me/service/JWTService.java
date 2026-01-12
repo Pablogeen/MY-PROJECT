@@ -7,8 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -18,12 +17,11 @@ import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class JWTService{
-    private static final Logger LOGGER = LoggerFactory.getLogger(JWTService.class);
 
         private final UserDetailsService userDetailsService;
 
@@ -36,7 +34,7 @@ public class JWTService{
             sk = KeyGenerator.getInstance("hmacSHA256").generateKey();
              secretKey = Base64.getEncoder().encodeToString(sk.getEncoded());
         } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("THERE IS AN ERROR IN THE JWT", e);
+            log.error("There is an error in the secret: {}",e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -50,7 +48,7 @@ public class JWTService{
 
             List<String> authorities =
                             userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                                    .collect(Collectors.toList());
+                                    .toList();
 
         return Jwts.builder()
                 .claim("authorities", authorities)
