@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
@@ -23,8 +23,9 @@ public class UserHelper {
 
     public void sendConfirmationToken(ConfirmationToken confirmationToken, User user) throws MessagingException {
 
-        String token = UUID.randomUUID().toString();
-        log.info("Generated Token: {}",token);
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(999999);
+       String token = String.format("%06d", code);
 
         ConfirmationToken saveConfirmationToken = new ConfirmationToken(
                 token,
@@ -37,10 +38,7 @@ public class UserHelper {
         tokenService.saveConfirmationToken(saveConfirmationToken);
         log.info("Confirmation Details saved successfully");
 
-        String link = "localhost:8080/api/v1/user/register/confirm?token= "+token;
-        log.info("Token generated");
-
-        emailService.sendConfirmationEmail(user.getEmail(), emailBuilder.buildEmail(user.getFirstname(), link));
+        emailService.sendConfirmationEmail(user.getEmail(), emailBuilder.buildEmail(user.getFirstname(), token));
         log.info("Email sent successfully");
 
     }

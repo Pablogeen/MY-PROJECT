@@ -1,9 +1,6 @@
 package com.rey.me.interfaces;
 
-import com.rey.me.dto.ChangePasswordDTO;
-import com.rey.me.dto.ResetPasswordDTO;
-import com.rey.me.dto.UserLoginDTO;
-import com.rey.me.dto.UserRequestDto;
+import com.rey.me.dto.*;
 import com.rey.me.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -25,9 +22,13 @@ public interface UserServiceInterface {
 
     String resetPassword(@Valid ResetPasswordDTO resetPassword)throws MessagingException;
 
-    List<Page<User>> getAllUsers(Pageable pageable);
+    Page<UserResponseDto> getAllUsers(Pageable pageable);
 
-    User getUserById(Long id);
+    UserResponseDto getUserById(Long id);
 
     List<User> getUsersByRole(String role, Pageable pageable);
+
+    String assignAdminRole(Long id);
+
+    String revokeAdminRole(Long id);
 }
