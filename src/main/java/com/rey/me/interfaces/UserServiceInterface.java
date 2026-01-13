@@ -8,8 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public interface UserServiceInterface {
     String register(@Valid UserRequestDto request)throws MessagingException;
@@ -26,7 +24,7 @@ public interface UserServiceInterface {
 
     UserResponseDto getUserById(Long id);
 
-    List<User> getUsersByRole(String role, Pageable pageable);
+    Page<UserResponseDto> getUsersByRole(String role, Pageable pageable);
 
     String assignAdminRole(Long id);
 

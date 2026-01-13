@@ -23,9 +23,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Random;
 
 
 @Service
@@ -33,7 +32,7 @@ import java.util.Random;
 @Slf4j
 public class UserServiceImpl implements UserServiceInterface {
 
-    private final UserRepository repo;
+    private final UserRepository userRepo;
     private final ConfirmationTokenService service;
     private final EmailSenderService emailService;
     private final AuthenticationManager manager;
@@ -52,7 +51,7 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setFirstname(request.getFirstname().strip());
         user.setLastname(request.getLastname().strip());
 
-        boolean usernameExist = repo.findByUsername(request.getUsername().strip()).isPresent();
+        boolean usernameExist = userRepo.findByUsername(request.getUsername().strip()).isPresent();
         log.info("Check if username is present: {}",usernameExist);
 
         if(usernameExist){
@@ -60,7 +59,7 @@ public class UserServiceImpl implements UserServiceInterface {
         }
         user.setUsername(request.getUsername().strip());
 
-        boolean emailExist = repo.findByEmail(request.getEmail().strip()).isPresent();
+        boolean emailExist = userRepo.findByEmail(request.getEmail().strip()).isPresent();
         log.info("Check if email is present: {}",emailExist);
 
         if (emailExist){
@@ -75,7 +74,7 @@ public class UserServiceImpl implements UserServiceInterface {
 
         user.setPassword(encoder.encode(request.getPassword().strip()));
         user.setRole(ROLE.USER);
-        repo.save(user);
+        userRepo.save(user);
         log.info("User saved successfully: {}",user.getUsername());
 
         ConfirmationToken confirmationToken = new ConfirmationToken();
@@ -110,7 +109,7 @@ public class UserServiceImpl implements UserServiceInterface {
     }
 
     public int enableUser(String email){
-     return repo.enableUser(email);
+     return userRepo.enableUser(email);
     }
 
 
@@ -130,7 +129,6 @@ public class UserServiceImpl implements UserServiceInterface {
     public String changePassword(@Valid ChangePasswordDTO passwordDTO, User user) {
 
         ChangePassword changePassword = new ChangePassword();
-
         changePassword.setCurrentPassword(encoder.encode(passwordDTO.getCurrentPassword().strip()));
 
         if (!encoder.matches(passwordDTO.getCurrentPassword(), user.getPassword())){
@@ -143,7 +141,7 @@ public class UserServiceImpl implements UserServiceInterface {
         changePassword.setTimestamp(LocalDateTime.now());
 
         passwordRepo.save(changePassword);
-        repo.setNewPassword(changePassword.getUser(), changePassword.
+        userRepo.setNewPassword(changePassword.getUser(), changePassword.
                 getNewPassword());
 
         return "PASSWORD CHANGED SUCCESSFULLY";
@@ -151,27 +149,30 @@ public class UserServiceImpl implements UserServiceInterface {
 
     @Transactional
     public String resetPassword(@Valid ResetPasswordDTO resetPassword) throws MessagingException {
-       boolean emailExist = repo.findByEmail(resetPassword.getEmail().strip()).isPresent();
+
+       boolean emailExist = userRepo.findByEmail(resetPassword.getEmail().strip()).isPresent();
 
         User user = new User();
 
        if(!emailExist && user.isEnabled()){
            throw new InvalidEmailException("INVALID EMAIL");
-
        }
 
       ResetPassword password = new ResetPassword();
        password.setEmail(resetPassword.getEmail().strip());
 
-       Random random = new Random();
-       String token = String.valueOf(100000+ random.nextInt(90000));
+        SecureRandom random = new SecureRandom();
+        int code = random.nextInt(999999);
+        String token = String.format("%06d", code);
+
        password.setToken(encoder.encode(token));
+
        password.setCreatedAt(LocalDateTime.now());
        password.setExpiration(LocalDateTime.now().plusMinutes(5));
 
        resetRepo.save(password);
 
-         user = repo.findByEmail(resetPassword.getEmail())
+         user = userRepo.findByEmail(resetPassword.getEmail())
                  .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
 
        emailService.sendResetPasswordToken(resetPassword.getEmail(), emailBuilder.resetPasswordEmail(user.getFirstname(), token));
@@ -195,9 +196,8 @@ public class UserServiceImpl implements UserServiceInterface {
     }
 
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
-        Page<User> userPage = repo.findAll(pageable);
+        Page<User> userPage = userRepo.findAll(pageable);
         log.info("Gotten all users from the database");
-
         Page<UserResponseDto> userResponseDto =userPage
                         .map(user -> modelMapper.map(user, UserResponseDto.class));
         log.info("Mapped user into UserResponseDto: {}",userResponseDto);
@@ -206,7 +206,7 @@ public class UserServiceImpl implements UserServiceInterface {
     }
 
     public UserResponseDto getUserById(Long id) {
-        User user = repo.findById(id)
+        User user = userRepo.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
         log.info("User found with id: {}",user.getId());
             UserResponseDto userResponse = modelMapper.map(user, UserResponseDto.class);
@@ -215,19 +215,25 @@ public class UserServiceImpl implements UserServiceInterface {
     }
 
 
-    public List<User> getUsersByRole(String role, Pageable pageable) {
-        return repo.findByRole(role, pageable);
+    public Page<UserResponseDto> getUsersByRole(String role, Pageable pageable) {
+    Page<User> userRole =  userRepo.findByRole(role, pageable)
+                .orElseThrow(() -> new IllegalStateException("ROLE NOT FOUND"));
+        log.info("Users with roles found in the database");
+        Page<UserResponseDto> roleResponse =
+                userRole.map(userr -> modelMapper.map(userr, UserResponseDto.class));
+        log.info("Mapped user role to Role Response: {}",roleResponse);
+        return roleResponse;
     }
 
     @Override
     @Transactional
     public String assignAdminRole(Long id) {
 
-        User user = repo.findById(id)
+        User user = userRepo.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
         log.info("User with id: {} found",user.getId());
 
-        if (ROLE.USER.equals(user.getRole())) {
+        if (ROLE.ADMIN.equals(user.getRole())) {
             log.error("User already has admin privileges");
             throw new IllegalStateException("User already has admin privileges");
         }
@@ -235,7 +241,7 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setRole(ROLE.ADMIN);
         log.info("Role set to Admin");
 
-        repo.save(user);
+        userRepo.save(user);
         return "ADMIN ROLE GRANTED SUCCESSFULLY";
     }
 
@@ -243,11 +249,11 @@ public class UserServiceImpl implements UserServiceInterface {
     @Transactional
     public String revokeAdminRole(Long id) {
 
-        User user = repo.findById(id)
+        User user = userRepo.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
         log.info("User id: {} found",user.getId());
 
-        if (ROLE.ADMIN.equals(user.getRole())){
+        if (ROLE.USER.equals(user.getRole())){
             log.error("User already has User privileges");
             throw new IllegalStateException("User already has User privileges");
         }
@@ -255,7 +261,7 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setRole(ROLE.USER);
         log.info("Role revoked to User");
 
-        repo.save(user);
+        userRepo.save(user);
         return "ADMIN ROLE REVOKED SUCCESSFULLY";
     }
 

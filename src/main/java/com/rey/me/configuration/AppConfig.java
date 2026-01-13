@@ -12,17 +12,15 @@ public class AppConfig {
     @Configuration
     public class ModelMapperConfig {
 
-        @Bean
-        public ModelMapper modelMapper() {
-
-            ModelMapper modelMapper = new ModelMapper();
-
-            modelMapper.getConfiguration()
-                    .setMatchingStrategy(MatchingStrategies.STRICT) // strict mapping
-                    .setSkipNullEnabled(true)                       // do NOT map null values
-                    .setFieldMatchingEnabled(true);            // match fields directly
-            return modelMapper;
-        }
+    @Bean
+    public ModelMapper modelMapper() {
+    ModelMapper modelMapper = new ModelMapper();
+                    modelMapper.getConfiguration()
+                                    .setMatchingStrategy(MatchingStrategies.STRICT)
+                                    .setSkipNullEnabled(true)
+                                    .setFieldMatchingEnabled(true);
+                    return modelMapper;
+                }
     }
 
 }
