@@ -30,11 +30,11 @@ public class SecurityConfig {
     @Bean
       public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
           http.csrf(customizer->customizer.disable());
-          http.authorizeHttpRequests(request->request.requestMatchers("/api/v1/users/**").permitAll()
+          http.authorizeHttpRequests(request->request
+                  .requestMatchers("/api/v1/users/assignAdmin").hasAuthority("ADMIN")
+                  .requestMatchers("/api/v1/users/revokeAdmin").hasAuthority("ADMIN")
+                  .requestMatchers("/api/v1/users/**").permitAll()
                           .requestMatchers("/api/v1/job/add").hasAnyAuthority("ADMIN","USER")
-                  .requestMatchers("/api/v1/users/assignAdmin").hasAnyAuthority("ADMIN")
-                  .requestMatchers("/api/v1/users/revokeAdmin").hasAnyAuthority("ADMIN")
-
                   .requestMatchers("/api/v1/job").hasAnyAuthority("ADMIN","USER")
                           .requestMatchers("/api/v1/job/id").hasAnyAuthority("ADMIN","USER")
                           .requestMatchers("/api/v1/job/delete/id").hasAnyAuthority("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")

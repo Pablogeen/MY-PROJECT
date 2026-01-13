@@ -6,7 +6,7 @@ public interface EmailSender {
 
     void sendConfirmationEmail(String to, String email) throws MessagingException;
 
-    void sendFileWithEmail(String to, String filename, String filePath) throws MessagingException;
+    void sendCVUploadNotification(String to, String filename, String filePath) throws MessagingException;
 
     void sendResetPasswordToken(String to, String email) throws MessagingException;
 }

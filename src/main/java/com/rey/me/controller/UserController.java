@@ -16,8 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
@@ -43,7 +41,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/assignAdmin")
+    @PatchMapping("/assignAdmin/{id}")
     public ResponseEntity<String> assignAdminRole(@PathVariable Long id) {
         log.info("Assigning Admin role to a user");
         String assignRole= userServiceInterface.assignAdminRole(id);
@@ -53,7 +51,7 @@ public class UserController {
 
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/revokeAdmin")
+    @PatchMapping("/revokeAdmin/{id}")
     public ResponseEntity<String> revokeAdminRole(@PathVariable Long id) {
         log.info("Revoking Admin role to a User");
         String revokedRole= userServiceInterface.revokeAdminRole(id);
@@ -62,21 +60,30 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO login){
-        return new ResponseEntity<>(userServiceInterface.login(login), HttpStatus.OK);
+    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO loginDto){
+        log.info("Request made to login");
+        String loginResponse = userServiceInterface.login(loginDto);
+        log.info("Successfully logged in");
+        return new ResponseEntity<>(loginResponse, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @PostMapping("/changePassword")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordDTO passwordDTO,
                                                  @AuthenticationPrincipal User user){
-        return new ResponseEntity<>(userServiceInterface.changePassword(passwordDTO, user), HttpStatus.OK);
+        log.info("Request made to changePassword");
+        String response = userServiceInterface.changePassword(passwordDTO, user);
+        log.info("Password changed successfully");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @PostMapping("/resetPassword")
-    public ResponseEntity<String>resetPassword(@Valid @RequestBody ResetPasswordDTO resetPassword) throws MessagingException {
-        return new ResponseEntity<>(userServiceInterface.resetPassword(resetPassword), HttpStatus.OK);
+    public ResponseEntity<String>resetPassword(
+            @Valid @RequestBody ResetPasswordDTO resetPassword) throws MessagingException {
+        log.info("Request made to resetPassword");
+        String response = userServiceInterface.resetPassword(resetPassword);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
@@ -85,13 +92,12 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserResponseDto> userPage = userServiceInterface.getAllUsers(pageable);
-
         log.info("Got {} users on page {}", userPage.getNumberOfElements(), page);
         return new ResponseEntity<>(userPage, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long id){
         log.info("Getting the details of user with id: {}",id);
         UserResponseDto userResponse = userServiceInterface.getUserById(id);
@@ -100,10 +106,12 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/{role}")
-    public ResponseEntity<List<User>> getRoleByUser(@PathVariable String role, @RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
+    @GetMapping("/role/{role}")
+    public ResponseEntity<Page<UserResponseDto>> getRoleByUser(
+            @PathVariable String role, @RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);
-        return new ResponseEntity<>(userServiceInterface.getUsersByRole(role, pageable), HttpStatus.OK);
+        Page<UserResponseDto> roleResponse = userServiceInterface.getUsersByRole(role, pageable);
+        return new ResponseEntity<>(roleResponse, HttpStatus.OK);
     }
 
 
