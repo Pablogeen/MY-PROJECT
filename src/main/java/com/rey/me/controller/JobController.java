@@ -66,11 +66,9 @@ public class JobController {
 
     @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
     @DeleteMapping("{id}/delete")
-    public ResponseEntity<String>deleteJob(@PathVariable Long id){
+    public ResponseEntity<?>deleteJob(@PathVariable Long id){
         log.info("About to delete job with id: {}",id);
-        String deletedResponse = serviceInterface.deleteJobById(id);
-        log.info("Job Deleted successfully");
-        return new ResponseEntity<>(deletedResponse, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(serviceInterface.deleteJobById(id), HttpStatus.NO_CONTENT);
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")
@@ -89,7 +87,7 @@ public class JobController {
         log.info("Request made to search for a job: {}",job);
         Pageable pageable = PageRequest.of(page, size);
         Page<JobResponseDto> jobResponse = serviceInterface.searchJob(job, pageable);
-        log.info("Jobs found related to search: {}",jobResponse);
+        log.info("Search completed, found {} results", jobResponse.getTotalElements());
         return new ResponseEntity<>(jobResponse, HttpStatus.OK);
     }
 
@@ -97,9 +95,9 @@ public class JobController {
     @PreAuthorize("hasAuthority('USER')")
     @PostMapping("/{id}/apply")
     public ResponseEntity<String> uploadCV(
-            @PathVariable Long id, @RequestPart MultipartFile file) throws IOException, MessagingException {
+            @PathVariable Long id, @RequestPart MultipartFile file, @AuthenticationPrincipal User user) throws IOException, MessagingException {
         log.info("Request to apply for job with id: {}",id);
-        String applicationResponse = serviceInterface.uploadCV(id, file);
+        String applicationResponse = serviceInterface.uploadCV(id, file, user);
         log.info("Applied to job successfully");
         return new ResponseEntity<>(applicationResponse, HttpStatus.OK);
     }

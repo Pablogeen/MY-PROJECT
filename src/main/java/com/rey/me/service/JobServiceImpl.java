@@ -92,17 +92,21 @@ public class JobServiceImpl implements JobServiceInterface {
     }
 
     public JobResponseDto updateJob(Long id, JobRequestDto jobRequest) {
-         repo.findById(id)
+      Job job = repo.findById(id)
                 .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
         log.info("Checked if job exists");
 
-        Job updatedJob = modelMapper.map(jobRequest, Job.class);
-        log.info("Mapped jobRequest into job: {}",updatedJob);
-
-        repo.save(updatedJob);
+        job.setCategory(jobRequest.getCategory());
+        job.setLocation(jobRequest.getLocation());
+        job.setSalary(jobRequest.getSalary());
+        job.setCompany(jobRequest.getCompany());
+        job.setTechs(jobRequest.getTechs());
+        job.setTitle(jobRequest.getTitle());
+        job.setDescription(jobRequest.getDescription());
+        repo.save(job);
         log.info("Saved job successfully");
 
-        JobResponseDto jobResponse = modelMapper.map(updatedJob, JobResponseDto.class);
+        JobResponseDto jobResponse = modelMapper.map(job, JobResponseDto.class);
         log.info("Chained updated Job into Job Response: {}",jobResponse);
 
         return jobResponse;
@@ -110,7 +114,7 @@ public class JobServiceImpl implements JobServiceInterface {
 
     private static final String UPLOAD_DIR = "uploads/";
 
-    public String uploadCV(Long id, MultipartFile file) throws IOException, MessagingException {
+    public String uploadCV(Long id, MultipartFile file, User user) throws IOException, MessagingException {
         // Validate file
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is empty or not present");
@@ -148,14 +152,14 @@ public class JobServiceImpl implements JobServiceInterface {
         log.info("File saved successfully: {}", uniqueFileName);
 
         // Get job owner email
-        User user = job.getUser();
+        User owner = job.getUser();
         if (user == null) {
             throw new IllegalStateException("Job has no associated user");
         }
         String jobOwnerEmail = user.getEmail();
 
         // TODO: Send notification email to job owner about new CV submission
-         emailService.sendCVUploadNotification(jobOwnerEmail, uniqueFileName, String.valueOf(filePath));
+         emailService.sendCVUploadNotification(jobOwnerEmail, uniqueFileName, String.valueOf(filePath), user);
 
         return "JOB APPLIED SUCCESSFULLY. ALL THE BEST!!!";
 

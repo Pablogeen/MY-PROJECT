@@ -31,7 +31,7 @@ public class Job {
     private String location;
     @Column(nullable = false)
     private List<String> techs;
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false)
     private Long salary;
     @Column(nullable = false, length = 20)
     private String category;

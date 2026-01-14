@@ -2,23 +2,19 @@ package com.rey.me.configuration;
 
 import com.rey.me.entity.User;
 import com.rey.me.repository.NewsLetterRepository;
-import org.springframework.security.core.Authentication;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Component;
 
 @Component("NewsLetterSecurity")
+@RequiredArgsConstructor
 public class NewsLetterSecurity {
 
-    private NewsLetterRepository repo;
+    private final NewsLetterRepository letterRepo;
 
-    public NewsLetterSecurity(NewsLetterRepository repo){
-        this.repo = repo;
-    }
-
-
-    public boolean isNewsOwner(Authentication authentication, Long id){
-        User user = (User) authentication.getPrincipal();
+    public boolean isNewsOwner(@AuthenticationPrincipal User user, Long id){
         Long userId = user.getId();
-        Long NewsOwnerId = repo.findNewsPostedById(id);
+        Long NewsOwnerId = letterRepo.findNewsLetterById(id);
         return userId.equals(NewsOwnerId);
     }
 }
