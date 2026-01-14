@@ -24,7 +24,6 @@ public class UserController {
 
     private final UserServiceInterface userServiceInterface;
 
-
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody
                                                    UserRequestDto request) throws MessagingException {
@@ -32,7 +31,6 @@ public class UserController {
         String registerUser = userServiceInterface.register(request);
         log.info("User registered successfully: {}",registerUser);
         return new ResponseEntity<>(registerUser, HttpStatus.CREATED);
-
     }
 
     @GetMapping("/confirmAccount")
@@ -41,7 +39,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/assignAdmin/{id}")
+    @PatchMapping("/assign-admin/{id}")
     public ResponseEntity<String> assignAdminRole(@PathVariable Long id) {
         log.info("Assigning Admin role to a user");
         String assignRole= userServiceInterface.assignAdminRole(id);
@@ -51,7 +49,7 @@ public class UserController {
 
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PatchMapping("/revokeAdmin/{id}")
+    @PatchMapping("/revoke-admin/{id}")
     public ResponseEntity<String> revokeAdminRole(@PathVariable Long id) {
         log.info("Revoking Admin role to a User");
         String revokedRole= userServiceInterface.revokeAdminRole(id);

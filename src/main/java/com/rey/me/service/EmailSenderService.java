@@ -47,16 +47,9 @@ public void sendConfirmationEmail(String receiverEmail, String message) throws M
 }
 
 @Override
-public void sendCVUploadNotification(String recipientEmail, String filename, String filePath) throws MessagingException {
-    // Get authenticated user
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+public void sendCVUploadNotification(String recipientEmail, String filename, String filePath, User applicant) throws MessagingException {
 
-    if (authentication == null || !(authentication.getPrincipal() instanceof User)) {
-        throw new IllegalStateException("No authenticated user found");
-    }
-
-    User user = (User) authentication.getPrincipal();
-    String applicantEmail = user.getEmail();
+    String applicantEmail = applicant.getEmail();
 
     if (applicantEmail == null) {
         throw new IllegalStateException("User email is not available");
@@ -72,7 +65,7 @@ public void sendCVUploadNotification(String recipientEmail, String filename, Str
     MimeMessage mimeMessage = mailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
-    helper.setFrom(applicantEmail);
+    helper.setFrom(email);
     helper.setReplyTo(applicantEmail);
     helper.setSubject("JOB APPLICATION");
     helper.setTo(recipientEmail);

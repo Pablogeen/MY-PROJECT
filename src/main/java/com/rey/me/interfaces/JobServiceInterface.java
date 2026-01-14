@@ -26,5 +26,5 @@ public interface JobServiceInterface {
 
     Page<JobResponseDto> searchJob(String job, Pageable pageable);
 
-    String uploadCV(Long id, MultipartFile file) throws IOException, MessagingException;
+    String uploadCV(Long id, MultipartFile file, User user) throws IOException, MessagingException;
 }
