@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface NewsLetterServiceInterface {
 
-    String createNewsLetter(NewsLetterRequestDto requestDto, User user);
+    NewsLetterResponseDto createNewsLetter(NewsLetterRequestDto requestDto, User user);
 
     Page<NewsLetterResponseDto> getNewsLetter(Pageable pageRequest);
 

@@ -33,16 +33,16 @@ public class UserController {
         return new ResponseEntity<>(registerUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/confirmAccount")
+    @GetMapping("/confirm-account")
     public ResponseEntity<String>confirmAccount(@RequestParam String token){
         return new ResponseEntity<>(userServiceInterface.confirmAccount(token), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/assign-admin/{id}")
-    public ResponseEntity<String> assignAdminRole(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> assignAdminRole(@PathVariable Long id) {
         log.info("Assigning Admin role to a user");
-        String assignRole= userServiceInterface.assignAdminRole(id);
+        UserResponseDto assignRole= userServiceInterface.assignAdminRole(id);
         log.info("Admin role assigned to user");
         return new ResponseEntity<>(assignRole, HttpStatus.OK);
     }
@@ -50,9 +50,9 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @PatchMapping("/revoke-admin/{id}")
-    public ResponseEntity<String> revokeAdminRole(@PathVariable Long id) {
+    public ResponseEntity<UserResponseDto> revokeAdminRole(@PathVariable Long id) {
         log.info("Revoking Admin role to a User");
-        String revokedRole= userServiceInterface.revokeAdminRole(id);
+        UserResponseDto revokedRole= userServiceInterface.revokeAdminRole(id);
         log.info("Admin role revoked");
         return new ResponseEntity<>(revokedRole, HttpStatus.OK);
     }
@@ -66,7 +66,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    @PostMapping("/changePassword")
+    @PostMapping("/change-password")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ChangePasswordDTO passwordDTO,
                                                  @AuthenticationPrincipal User user){
         log.info("Request made to changePassword");
@@ -76,7 +76,7 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
-    @PostMapping("/resetPassword")
+    @PostMapping("/reset-password")
     public ResponseEntity<String>resetPassword(
             @Valid @RequestBody ResetPasswordDTO resetPassword) throws MessagingException {
         log.info("Request made to resetPassword");

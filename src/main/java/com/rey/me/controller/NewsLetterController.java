@@ -4,6 +4,9 @@ import com.rey.me.dto.NewsLetterRequestDto;
 import com.rey.me.dto.NewsLetterResponseDto;
 import com.rey.me.entity.User;
 import com.rey.me.interfaces.NewsLetterServiceInterface;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -25,10 +28,10 @@ public class NewsLetterController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @PostMapping("/post")
-    public ResponseEntity<String>createLetter(
+    public ResponseEntity<NewsLetterResponseDto>createLetter(@Valid
             @RequestBody NewsLetterRequestDto requestDto, @AuthenticationPrincipal User user) {
         log.info("Request to post a news letter");
-        String response = serviceInterface.createNewsLetter(requestDto, user);
+        NewsLetterResponseDto response = serviceInterface.createNewsLetter(requestDto, user);
         log.info("News Letter created Successfully");
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -36,7 +39,7 @@ public class NewsLetterController {
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping()
     public ResponseEntity<Page<NewsLetterResponseDto>>readNewsLetter(
-            @RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
+            @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Max(10) int size){
         log.info("Request made to retrieve all newsLetter");
         Pageable pageRequest = PageRequest.of(page,size);
         Page<NewsLetterResponseDto> newsResponse = serviceInterface.getNewsLetter(pageRequest);
@@ -53,12 +56,12 @@ public class NewsLetterController {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN') or @NewsLetterSecurity.isNewsOwner(authentication, #id)")
-    @DeleteMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteNews(@PathVariable Long id){
         log.info("Request made to delete News Letter with id: {}", id);
         serviceInterface.deleteNewsById(id);
         log.info("News Deleted Successfully");
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
 

@@ -12,7 +12,7 @@ import java.io.IOException;
 
 
 public interface JobServiceInterface {
-    String postJob(JobRequestDto job, User user);
+    JobResponseDto postJob(JobRequestDto job, User user);
 
     Page<JobResponseDto> getJob(Pageable pageable);
 

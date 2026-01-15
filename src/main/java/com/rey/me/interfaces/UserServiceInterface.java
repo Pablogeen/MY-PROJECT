@@ -26,7 +26,7 @@ public interface UserServiceInterface {
 
     Page<UserResponseDto> getUsersByRole(String role, Pageable pageable);
 
-    String assignAdminRole(Long id);
+    UserResponseDto assignAdminRole(Long id);
 
-    String revokeAdminRole(Long id);
+    UserResponseDto revokeAdminRole(Long id);
 }

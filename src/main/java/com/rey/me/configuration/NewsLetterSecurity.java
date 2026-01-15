@@ -14,7 +14,7 @@ public class NewsLetterSecurity {
 
     public boolean isNewsOwner(@AuthenticationPrincipal User user, Long id){
         Long userId = user.getId();
-        Long NewsOwnerId = letterRepo.findNewsLetterById(id);
+        Long NewsOwnerId = letterRepo.findUserByNewsLetter(id);
         return userId.equals(NewsOwnerId);
     }
 }
