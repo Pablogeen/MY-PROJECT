@@ -14,6 +14,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,6 +49,7 @@ public class UserServiceImpl implements UserServiceInterface {
     private final ModelMapper modelMapper;
 
     @Transactional
+    @CachePut(value = "users", key = "#result.id")
     public String register(UserRequestDto request) throws MessagingException {
 
         User user = new User();
@@ -195,6 +200,7 @@ public class UserServiceImpl implements UserServiceInterface {
 
     }
 
+    @Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
         Page<User> userPage = userRepo.findAll(pageable);
         log.info("Gotten all users from the database");
@@ -205,6 +211,7 @@ public class UserServiceImpl implements UserServiceInterface {
         return userResponseDto;
     }
 
+    @Cacheable(value = "users", key = "#id")
     public UserResponseDto getUserById(Long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
@@ -214,7 +221,7 @@ public class UserServiceImpl implements UserServiceInterface {
         return userResponse;
     }
 
-
+    @Cacheable(value = "usersByRole", key = "#role + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<UserResponseDto> getUsersByRole(String role, Pageable pageable) {
     Page<User> userRole =  userRepo.findByRole(role, pageable)
                 .orElseThrow(() -> new IllegalStateException("ROLE NOT FOUND"));
@@ -226,9 +233,14 @@ public class UserServiceImpl implements UserServiceInterface {
     }
 
     @Override
-    @Transactional
-    public String assignAdminRole(Long id) {
-
+    @Caching(
+            put = @CachePut(value = "users", key = "#id"),
+            evict = {
+                    @CacheEvict(value = "allUsers", allEntries = true),
+                    @CacheEvict(value = "usersByRole", allEntries = true)
+            }
+    )
+    public UserResponseDto assignAdminRole(Long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
         log.info("User with id: {} found",user.getId());
@@ -241,14 +253,23 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setRole(ROLE.ADMIN);
         log.info("Role set to Admin");
 
-        userRepo.save(user);
-        return "ADMIN ROLE GRANTED SUCCESSFULLY";
+        User savedUser = userRepo.save(user);
+        log.info("Role assigned successfully");
+
+        UserResponseDto userResponse = modelMapper.map(savedUser, UserResponseDto.class);
+        log.info("Mapped saved user into response dto");
+        return userResponse;
     }
 
     @Override
-    @Transactional
-    public String revokeAdminRole(Long id) {
-
+    @Caching(
+            put = @CachePut(value = "users", key = "#id"),
+            evict = {
+                    @CacheEvict(value = "allUsers", allEntries = true),
+                    @CacheEvict(value = "usersByRole", allEntries = true)
+            }
+    )
+    public UserResponseDto revokeAdminRole(Long id) {
         User user = userRepo.findById(id)
                 .orElseThrow(()-> new UserNotFoundException("USER NOT FOUND"));
         log.info("User id: {} found",user.getId());
@@ -261,9 +282,13 @@ public class UserServiceImpl implements UserServiceInterface {
         user.setRole(ROLE.USER);
         log.info("Role revoked to User");
 
-        userRepo.save(user);
-        return "ADMIN ROLE REVOKED SUCCESSFULLY";
+        User savedUser = userRepo.save(user);
+        log.info("Role saved to user");
+
+        UserResponseDto userResponse = modelMapper.map(savedUser, UserResponseDto.class);
+        log.info("Saved User into UserResponse");
+        return userResponse;
     }
-
-
 }
+
+

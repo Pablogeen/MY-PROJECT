@@ -30,9 +30,9 @@ public class JobController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @PostMapping("/add")
-    public ResponseEntity<String> postJob(@RequestBody JobRequestDto job, @AuthenticationPrincipal User user){
+    public ResponseEntity<JobResponseDto> postJob(@RequestBody JobRequestDto job, @AuthenticationPrincipal User user){
         log.info("Request has been made to post a job: {}",job);
-        String jobResponse = serviceInterface.postJob(job, user);
+        JobResponseDto jobResponse = serviceInterface.postJob(job, user);
         return new ResponseEntity<>(jobResponse, HttpStatus.CREATED);
     }
 
@@ -68,7 +68,8 @@ public class JobController {
     @DeleteMapping("{id}/delete")
     public ResponseEntity<?>deleteJob(@PathVariable Long id){
         log.info("About to delete job with id: {}",id);
-        return new ResponseEntity<>(serviceInterface.deleteJobById(id), HttpStatus.NO_CONTENT);
+        serviceInterface.deleteJobById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PreAuthorize("hasAuthority('ADMIN') or @JobSecurity.isJobOwner(authentication, #id)")

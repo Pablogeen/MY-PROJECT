@@ -1,10 +1,12 @@
 package com.rey.me.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -19,8 +21,9 @@ public class NewsLetter {
          @Column(length = 200)
          private String title;
          @Lob
+         @Column(columnDefinition = "LONGTEXT")
         private String content;
-        private Instant timePosted = Instant.now();
+        private Instant timeStamp = Instant.now();
         @ManyToOne
         @JoinColumn(name = "user_id", referencedColumnName = "id")
         private User user;

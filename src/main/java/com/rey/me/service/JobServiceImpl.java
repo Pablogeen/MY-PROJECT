@@ -11,6 +11,10 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,15 +35,28 @@ public class JobServiceImpl implements JobServiceInterface {
     private final EmailSenderService emailService;
     private final ModelMapper modelMapper;
 
-    public String postJob(JobRequestDto jobRequest, User user) {
+
+    @Caching(
+            put = @CachePut(value = "jobs", key = "#result.id"),
+            evict = {
+                    @CacheEvict(value = "allJobs", allEntries = true),
+                    @CacheEvict(value = "jobsByCategory", allEntries = true),
+                    @CacheEvict(value = "searchedJobs", allEntries = true)
+            }
+    )
+    public JobResponseDto postJob(JobRequestDto jobRequest, User user) {
         Job job = modelMapper.map(jobRequest, Job.class);
         log.info("Job request mapped into job entity: {}",job);
         job.setUser(user);
-        repo.save(job);
-        log.info("Job save successfully");
-        return "JOB POSTED SUCCESSFULLY";
+        Job savedJob = repo.save(job);
+        log.info("Job saved successfully");
+
+        JobResponseDto response = modelMapper.map(savedJob, JobResponseDto.class);
+        log.info("Mapped saved job to response DTO");
+        return response;
     }
 
+    @Cacheable(value = "allJobs", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort.toString()")
     public Page<JobResponseDto> getJob(Pageable pageable) {
         log.info("Getting job");
         Page<Job> jobResponse = repo.findAll(pageable);
@@ -50,6 +67,7 @@ public class JobServiceImpl implements JobServiceInterface {
         return mappedResponse;
     }
 
+    @Cacheable(value = "jobsByCategory", key = "#category + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<JobResponseDto> getJobByCategory(Pageable pageable, String category) {
         Page<Job> jobCategory = repo.findByCategory(pageable, category);
         log.info("Jobs found from the category: {}",category);
@@ -59,7 +77,7 @@ public class JobServiceImpl implements JobServiceInterface {
         return mappedResponse;
     }
 
-
+    @Cacheable(value = "jobs", key = "#id")
     public JobResponseDto getJobById(Long id) {
         Job job = repo.findById(id)
                 .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
@@ -69,6 +87,12 @@ public class JobServiceImpl implements JobServiceInterface {
         return jobResponse;
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "jobs", key = "#id"),
+            @CacheEvict(value = "allJobs", allEntries = true),
+            @CacheEvict(value = "jobsByCategory", allEntries = true),
+            @CacheEvict(value = "searchedJobs", allEntries = true)
+    })
     public String deleteJobById(Long id){
         Job job = repo.findById(id)
                 .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
@@ -78,6 +102,7 @@ public class JobServiceImpl implements JobServiceInterface {
         return "JOB DELETED SUCCESSFULLY";
     }
 
+    @Cacheable(value = "searchedJobs", key = "#job + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<JobResponseDto> searchJob(String job, Pageable pageable) {
         if (job == null) {
             throw new IllegalStateException("Invalid Request: Job not found");
@@ -85,14 +110,22 @@ public class JobServiceImpl implements JobServiceInterface {
         Page<Job> searchedJob = repo.search(job, pageable)
                 .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
         log.info("Gotten searchedJob from DB");
-      Page<JobResponseDto> mappedResponse =
-              searchedJob.map(jobb -> modelMapper.map(jobb, JobResponseDto.class));
-      log.info("Mapped job into JobResponse: {}",mappedResponse);
-      return mappedResponse;
+        Page<JobResponseDto> mappedResponse =
+                searchedJob.map(jobb -> modelMapper.map(jobb, JobResponseDto.class));
+        log.info("Mapped job into JobResponse: {}",mappedResponse);
+        return mappedResponse;
     }
 
+    @Caching(
+            put = @CachePut(value = "jobs", key = "#id"),
+            evict = {
+                    @CacheEvict(value = "allJobs", allEntries = true),
+                    @CacheEvict(value = "jobsByCategory", allEntries = true),
+                    @CacheEvict(value = "searchedJobs", allEntries = true)
+            }
+    )
     public JobResponseDto updateJob(Long id, JobRequestDto jobRequest) {
-      Job job = repo.findById(id)
+        Job job = repo.findById(id)
                 .orElseThrow(()-> new JobNotFoundException("JOB NOT FOUND"));
         log.info("Checked if job exists");
 
@@ -119,7 +152,6 @@ public class JobServiceImpl implements JobServiceInterface {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is empty or not present");
         }
-
         // Validate file type (assuming CV should be PDF or DOC)
         String contentType = file.getContentType();
         if (contentType == null ||
@@ -144,6 +176,10 @@ public class JobServiceImpl implements JobServiceInterface {
         String originalFileName = file.getOriginalFilename();
         String fileExtension = originalFileName != null ?
                 originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
+        if (originalFileName != null && originalFileName.lastIndexOf(".") > 0){
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf(""));
+        }
+
         String uniqueFileName = UUID.randomUUID() + fileExtension;
 
         // Save the file
@@ -153,10 +189,10 @@ public class JobServiceImpl implements JobServiceInterface {
 
         // Get job owner email
         User owner = job.getUser();
-        if (user == null) {
+        if (owner == null) {
             throw new IllegalStateException("Job has no associated user");
         }
-        String jobOwnerEmail = user.getEmail();
+        String jobOwnerEmail =owner.getEmail();
 
         // TODO: Send notification email to job owner about new CV submission
          emailService.sendCVUploadNotification(jobOwnerEmail, uniqueFileName, String.valueOf(filePath), user);

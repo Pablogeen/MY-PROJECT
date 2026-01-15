@@ -5,13 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface NewsLetterRepository extends JpaRepository<NewsLetter, Long> {
 
-    @Query(value = "SELECT * FROM news_letter ORDER BY time_posted ASC", nativeQuery = true)
-    List<NewsLetter> getNewsByOrderOfDate();
-
-    Long findNewsLetterById(Long id);
+    @Query(value = "SELECT n.user.id FROM NewsLetter n WHERE n.id =:id")
+    Long findUserByNewsLetter(Long id);
 }
