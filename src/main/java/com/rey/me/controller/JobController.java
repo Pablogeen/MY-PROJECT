@@ -2,6 +2,7 @@ package com.rey.me.controller;
 
 import com.rey.me.dto.JobRequestDto;
 import com.rey.me.dto.JobResponseDto;
+import com.rey.me.dto.PageResponse;
 import com.rey.me.entity.User;
 import com.rey.me.interfaces.JobServiceInterface;
 import jakarta.mail.MessagingException;
@@ -38,11 +39,12 @@ public class JobController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     @GetMapping()
-    public ResponseEntity<Page<JobResponseDto>>getJob(
+    public PageResponse<JobResponseDto> getJob(
             @RequestParam(defaultValue = "0")int page, @RequestParam(defaultValue = "10")int size){
         Pageable pageable = PageRequest.of(page, size);
         Page<JobResponseDto> jobResponse = serviceInterface.getJob(pageable);
-        return new ResponseEntity<>(jobResponse, HttpStatus.OK);
+        return new PageResponse<>(jobResponse.getContent(), jobResponse.getNumber(),
+                jobResponse.getSize(), jobResponse.getTotalElements(), jobResponse.getTotalPages());
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN','USER')")

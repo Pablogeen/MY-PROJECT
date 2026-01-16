@@ -3,10 +3,11 @@ package com.rey.me.dto;
 import com.rey.me.entity.User;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Data
-public class JobResponseDto {
+public class JobResponseDto implements Serializable {
 
     private Long id;
     private String title;

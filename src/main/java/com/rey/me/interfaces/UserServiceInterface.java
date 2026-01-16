@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface UserServiceInterface {
-    String register(@Valid UserRequestDto request)throws MessagingException;
+    UserResponseDto register(@Valid UserRequestDto request)throws MessagingException;
 
     String confirmAccount(String token);
 
