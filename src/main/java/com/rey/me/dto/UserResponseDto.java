@@ -3,8 +3,10 @@ package com.rey.me.dto;
 import com.rey.me.entity.ROLE;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class UserResponseDto {
+public class UserResponseDto implements Serializable {
 
     private String firstname;
     private String lastname;

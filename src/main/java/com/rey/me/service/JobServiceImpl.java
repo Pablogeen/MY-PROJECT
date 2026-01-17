@@ -176,9 +176,6 @@ public class JobServiceImpl implements JobServiceInterface {
         String originalFileName = file.getOriginalFilename();
         String fileExtension = originalFileName != null ?
                 originalFileName.substring(originalFileName.lastIndexOf(".")) : "";
-        if (originalFileName != null && originalFileName.lastIndexOf(".") > 0){
-            fileExtension = originalFileName.substring(originalFileName.lastIndexOf(""));
-        }
 
         String uniqueFileName = UUID.randomUUID() + fileExtension;
 

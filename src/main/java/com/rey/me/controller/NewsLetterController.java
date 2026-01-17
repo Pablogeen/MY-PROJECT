@@ -2,6 +2,7 @@ package com.rey.me.controller;
 
 import com.rey.me.dto.NewsLetterRequestDto;
 import com.rey.me.dto.NewsLetterResponseDto;
+import com.rey.me.dto.PageResponse;
 import com.rey.me.entity.User;
 import com.rey.me.interfaces.NewsLetterServiceInterface;
 import jakarta.validation.Valid;
@@ -38,13 +39,14 @@ public class NewsLetterController {
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     @GetMapping()
-    public ResponseEntity<Page<NewsLetterResponseDto>>readNewsLetter(
+    public PageResponse<NewsLetterResponseDto>readNewsLetter(
             @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Max(10) int size){
         log.info("Request made to retrieve all newsLetter");
         Pageable pageRequest = PageRequest.of(page,size);
         Page<NewsLetterResponseDto> newsResponse = serviceInterface.getNewsLetter(pageRequest);
         log.info("All news letter found successfully");
-            return new ResponseEntity<>(newsResponse, HttpStatus.OK);
+        return new PageResponse<>(newsResponse.getContent(), newsResponse.getNumber(),
+                newsResponse.getSize(), newsResponse.getTotalElements(), newsResponse.getTotalPages());
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")

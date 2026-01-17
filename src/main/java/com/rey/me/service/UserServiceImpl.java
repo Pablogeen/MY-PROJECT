@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserServiceInterface {
 
     @Transactional
     @CachePut(value = "users", key = "#result.id")
-    public String register(UserRequestDto request) throws MessagingException {
+    public UserResponseDto register(UserRequestDto request) throws MessagingException {
 
         User user = new User();
         user.setFirstname(request.getFirstname().strip());
@@ -79,14 +79,17 @@ public class UserServiceImpl implements UserServiceInterface {
 
         user.setPassword(encoder.encode(request.getPassword().strip()));
         user.setRole(ROLE.USER);
-        userRepo.save(user);
+       User savedUser = userRepo.save(user);
         log.info("User saved successfully: {}",user.getUsername());
+
+        UserResponseDto  mappedUser = modelMapper.map(savedUser, UserResponseDto.class);
+        log.info("Mapped saved user to Response DTO");
 
         ConfirmationToken confirmationToken = new ConfirmationToken();
         userHelper.sendConfirmationToken(confirmationToken, user);
         log.info("Confirmed Token Successfully");
 
-            return "REGISTERED SUCCESSFULLY";
+            return mappedUser;
 
     }
 
@@ -200,7 +203,7 @@ public class UserServiceImpl implements UserServiceInterface {
 
     }
 
-    @Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+   @Cacheable(value = "allUsers", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<UserResponseDto> getAllUsers(Pageable pageable) {
         Page<User> userPage = userRepo.findAll(pageable);
         log.info("Gotten all users from the database");

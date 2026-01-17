@@ -25,10 +25,10 @@ public class UserController {
     private final UserServiceInterface userServiceInterface;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody
+    public ResponseEntity<UserResponseDto> registerUser(@Valid @RequestBody
                                                    UserRequestDto request) throws MessagingException {
         log.info("Received request to register user");
-        String registerUser = userServiceInterface.register(request);
+        UserResponseDto registerUser = userServiceInterface.register(request);
         log.info("User registered successfully: {}",registerUser);
         return new ResponseEntity<>(registerUser, HttpStatus.CREATED);
     }
@@ -86,12 +86,13 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping()
-    public ResponseEntity<Page<UserResponseDto>> getAllUsers(
+    public PageResponse<UserResponseDto> getAllUsers(
             @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserResponseDto> userPage = userServiceInterface.getAllUsers(pageable);
         log.info("Got {} users on page {}", userPage.getNumberOfElements(), page);
-        return new ResponseEntity<>(userPage, HttpStatus.OK);
+            return new PageResponse<>(userPage.getContent(), userPage.getNumber(),
+                    userPage.getSize(), userPage.getTotalElements(), userPage.getTotalPages());
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
