@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserServiceInterface {
     private final ChangePasswordRepo passwordRepo;
     private final JWTService jwtService;
     private final ResetPasswordRepository resetRepo;
-    private final BCryptPasswordEncoder encoder;
+    private final BCryptPasswordEncoder encoder; 
     private final UserHelper userHelper;
     private final EmailBuilder emailBuilder;
     private final ModelMapper modelMapper;
@@ -209,7 +209,7 @@ public class UserServiceImpl implements UserServiceInterface {
         log.info("Gotten all users from the database");
         Page<UserResponseDto> userResponseDto =userPage
                         .map(user -> modelMapper.map(user, UserResponseDto.class));
-        log.info("Mapped user into UserResponseDto: {}",userResponseDto);
+        log.info("Mapped user into UserResponseDto");
 
         return userResponseDto;
     }

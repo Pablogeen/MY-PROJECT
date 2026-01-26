@@ -24,7 +24,7 @@ public class EmailSenderService implements EmailSender {
 
     private final JavaMailSender mailSender;
 
-    @Value("${SMTP_USERNAME}")
+    @Value("${spring.mail.username}")
     private String email;
 
 
