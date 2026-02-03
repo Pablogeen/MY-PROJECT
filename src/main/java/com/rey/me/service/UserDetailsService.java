@@ -1,6 +1,7 @@
 package com.rey.me.service;
 
 
+import com.rey.me.exception.UserNotFoundException;
 import com.rey.me.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,7 +16,15 @@ public class UserDetailsService implements org.springframework.security.core.use
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return repo.findByUsername(username)
-                .orElseThrow(()->new UsernameNotFoundException("USERNAME NOT FOUND"));
+        return (UserDetails) repo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("USER NOT FOUND"));
+
     }
+
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        return repo.findByUsername(username)
+//                .orElseThrow(() -> new UserNotFoundException("USER NOT FOUND"));
+//
+//    }
 }

@@ -1,6 +1,6 @@
 package com.rey.me.service;
 
-import com.rey.me.entity.User;
+import com.rey.me.dto.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -43,8 +43,8 @@ public class JWTService{
     public String generateToken(@NotBlank @NotNull String username) {
         Map<String, Object> claims = new HashMap<>();
 
-        User userDetails =
-                (User) userDetailsService.loadUserByUsername(username.strip());
+        CustomUserDetails userDetails =
+                (CustomUserDetails) userDetailsService.loadUserByUsername(username.strip());
 
             List<String> authorities =
                             userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
