@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MySQL Database
   mysql:
     image: mysql:8.0
     container_name: mysql_db
@@ -9,20 +8,20 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # Optional: for initial DB setup
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 40s
 
   # Redis Cache
   redis:
